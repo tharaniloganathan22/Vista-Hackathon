@@ -99,8 +99,6 @@ HotSpot was built with a mission to prevent fire hazards through AI-powered auto
 
 “The best tech is invisible — it quietly protects, empowers, and cares.”
 
-❤️ Credits
-Vedhapriyaa S – Lead Developer & Vision Architect
 
 YOLOv8 – Ultralytics
 
