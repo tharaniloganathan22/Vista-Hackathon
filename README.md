@@ -7,8 +7,6 @@ HotSpot is an AI-powered intelligent monitoring system that detects potential fi
 
 Built as a response to real-world safety concerns, HotSpot acts as your virtual safety assistant, constantly watching over your appliances through webcam or CCTV feeds. It combines the power of **Computer Vision**, **YOLO Object Detection**, and **Smart Alert Systems** to give you peace of mind, wherever you are.
 
-![WhatsApp Image 2025-04-14 at 00 50 46_39868eed](https://github.com/user-attachments/assets/c2224211-deb4-4b9b-ab39-6df5bb1a1a01)
-
 ---
 
 ## 🌟 Key Features
