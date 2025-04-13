@@ -1,0 +1,179 @@
+{% extends "layout.html" %}
+
+{% block title %}Webcam Detection | Appliance Alert AI{% endblock %}
+
+{% block content %}
+<div class="dashboard-container glass-box">
+  <h2 class="section-heading" style="color: #C7372C;">Live Webcam Detection</h2>
+  
+  <div id="camera-status" class="alert alert-warning">
+    <i class="fas fa-camera"></i> Camera: Connecting...
+  </div>
+
+  <div class="text-center mb-4">
+    <div>
+      <img src="{{ url_for('video_feed') }}" id="video" width="640" height="480" alt="Webcam feed">
+    </div>
+  </div>
+
+  <div class="detection-info glass-box" style="display: none;">
+    <div id="person-count"><i class="fas fa-user"></i> Persons: --</div>
+    <div id="appliance-count"><i class="fas fa-plug"></i> Appliances: --</div>
+    <div id="alert-status"><i class="fas fa-bell"></i> Status: --</div>
+  </div>
+
+  <div class="d-flex justify-content-center gap-3 mt-4">
+    <button id="start-btn" class="btn btn-success" disabled>
+      <i class="fas fa-play"></i> Start Detection
+    </button>
+    <button id="stop-btn" class="btn btn-danger" disabled>
+      <i class="fas fa-stop"></i> Stop Detection
+    </button>
+  </div>
+
+  <div class="mt-4">
+    <a href="/dashboard" class="btn btn-secondary">
+      <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const webcamFeed = document.getElementById('video');
+    const cameraStatus = document.getElementById('camera-status');
+    const startBtn = document.getElementById('start-btn');
+    const stopBtn = document.getElementById('stop-btn');
+    const detectionInfo = document.querySelector('.detection-info');
+
+    webcamFeed.onerror = function() {
+        cameraStatus.innerHTML = '<i class="fas fa-times-circle"></i> Camera: Feed Error';
+        cameraStatus.className = 'alert alert-danger';
+        startBtn.disabled = true;
+    };
+
+    function checkCameraStatus() {
+        fetch('/camera_status')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'active') {
+                    cameraStatus.innerHTML = '<i class="fas fa-check-circle"></i> Camera: Active';
+                    cameraStatus.className = 'alert alert-success';
+                    startBtn.disabled = false;
+                } else {
+                    cameraStatus.innerHTML = '<i class="fas fa-times-circle"></i> Camera: Inactive';
+                    cameraStatus.className = 'alert alert-danger';
+                    startBtn.disabled = true;
+                }
+            })
+            .catch(error => {
+                console.error('Camera status error:', error);
+                cameraStatus.innerHTML = '<i class="fas fa-times-circle"></i> Camera: Error';
+                cameraStatus.className = 'alert alert-danger';
+                startBtn.disabled = true;
+            });
+    }
+
+    // Initial camera start
+    fetch('/start_camera')
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                checkCameraStatus();
+                setInterval(checkCameraStatus, 2000);
+            } else {
+                cameraStatus.innerHTML = '<i class="fas fa-times-circle"></i> Camera: ' + data.message;
+                cameraStatus.className = 'alert alert-danger';
+            }
+        })
+        .catch(error => {
+            console.error('Camera start error:', error);
+            cameraStatus.innerHTML = '<i class="fas fa-times-circle"></i> Camera: Error';
+            cameraStatus.className = 'alert alert-danger';
+        });
+
+    let eventSource = null;
+
+    function connectEventSource() {
+        eventSource = new EventSource('/detection_updates');
+        
+        eventSource.onmessage = function(e) {
+            try {
+                const data = JSON.parse(e.data);
+                console.log('Client received detection update:', data);
+                
+                document.getElementById('person-count').innerHTML = 
+                    `<i class="fas fa-user"></i> Persons: ${data.person_count}`;
+                document.getElementById('appliance-count').innerHTML = 
+                    `<i class="fas fa-plug"></i> Appliances: ${data.appliances.length}`;
+                
+                if (data.person_count > 0) {
+                    detectionInfo.style.border = '3px solid green';
+                    document.getElementById('alert-status').innerHTML = 
+                        `<i class="fas fa-bell"></i> Status: <span class="text-success">Person Detected</span>`;
+                } else if (data.appliances.length > 0) {
+                    detectionInfo.style.border = '3px solid red';
+                    document.getElementById('alert-status').innerHTML = 
+                        `<i class="fas fa-bell"></i> Status: <span class="text-danger">No Person, Appliances On</span>`;
+                } else {
+                    detectionInfo.style.border = '3px solid gray';
+                    document.getElementById('alert-status').innerHTML = 
+                        `<i class="fas fa-bell"></i> Status: <span class="text-muted">Idle</span>`;
+                }
+                detectionInfo.style.display = 'block';
+            } catch (err) {
+                console.error('EventSource parse error:', err);
+            }
+        };
+
+        eventSource.onerror = function() {
+            console.error('EventSource error, reconnecting...');
+            eventSource.close();
+            setTimeout(connectEventSource, 2000);
+        };
+    }
+
+    startBtn.addEventListener('click', function() {
+        fetch('/start_detection')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    startBtn.disabled = true;
+                    stopBtn.disabled = false;
+                    connectEventSource();
+                } else {
+                    alert('Failed to start detection: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Start detection error:', error);
+                alert('Error starting detection');
+            });
+    });
+
+    stopBtn.addEventListener('click', function() {
+        fetch('/stop_detection')
+            .then(response => response.text())
+            .then(html => {
+                document.open();
+                document.write(html);
+                document.close();
+                if (eventSource) {
+                    eventSource.close();
+                }
+                fetch('/stop_camera', { method: 'GET', keepalive: true });
+            })
+            .catch(error => {
+                console.error('Stop detection error:', error);
+                alert('Error stopping detection');
+            });
+    });
+
+    window.addEventListener('beforeunload', function() {
+        if (eventSource) {
+            eventSource.close();
+        }
+        fetch('/stop_camera', { method: 'GET', keepalive: true });
+    });
+});
+{% endblock %}

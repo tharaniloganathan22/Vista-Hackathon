@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Video Detection Result</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        video { max-width: 100%; }
+        pre { background-color: #f4f4f4; padding: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Video Detection Result</h1>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <p style="color: {% if 'success' in message[1] %}green{% else %}red{% endif %};">{{ message[0] }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    {% if video_path %}
+        <video controls>
+            <source src="{{ url_for('static', filename=video_path) }}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    {% else %}
+        <p>No video to display.</p>
+    {% endif %}
+    {% if analysis %}
+        <h2>Analysis</h2>
+        <pre>{{ analysis | tojson(indent=2) | safe }}</pre>
+    {% endif %}
+    <a href="{{ url_for('detect_video_file') }}">Back to Video Detection</a>
+    <a href="{{ url_for('dashboard') }}">Dashboard</a>
+</body>
+</html>

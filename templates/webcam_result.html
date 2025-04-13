@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+
+{% block title %}Detection Result | Appliance Alert AI{% endblock %}
+
+{% block content %}
+<div class="dashboard-container glass-box">
+    <h2 class="section-heading" style="color: #C7372C;">Detection Result</h2>
+    
+    <div class="alert {% if not result.alert_required %}alert-success{% else %}alert-danger{% endif %}">
+        <h4 class="alert-heading">
+            {% if not result.alert_required %}
+                <i class="fas fa-check-circle"></i> Safe Environment Detected
+            {% else %}
+                <i class="fas fa-exclamation-triangle"></i> Potential Hazard Detected!
+            {% endif %}
+        </h4>
+        <hr>
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>People Count:</strong> {{ result.person_count }}</p>
+                <p><strong>Alert Required:</strong> {% if result.alert_required %}Yes{% else %}No{% endif %}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Timestamp:</strong> {{ result.timestamp }}</p>
+                {% if result.appliances %}
+                <p><strong>Detected Appliances:</strong></p>
+                <ul>
+                    {% for appliance in result.appliances %}
+                    <li>{{ appliance }}</li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p><strong>Detected Appliances:</strong> None</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+{% endblock %}
