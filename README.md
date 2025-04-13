@@ -65,6 +65,15 @@ Built as a response to real-world safety concerns, HotSpot acts as your virtual 
 ---
 
 ## 🚀 Getting Started
+![image](https://github.com/user-attachments/assets/f99873a1-ce5c-437b-9d84-cf17fc6e0f86)
+![image](https://github.com/user-attachments/assets/6981a82b-8648-45f2-89d4-10c0bf62e3ce)
+![image](https://github.com/user-attachments/assets/ef0eb2b5-fce9-4571-9532-261bedf1d118)
+![image](https://github.com/user-attachments/assets/c66c0bbf-fc06-4fd7-b1a0-8f73413bc743)
+![image](https://github.com/user-attachments/assets/8067af0e-e858-471a-a341-b6076c15e066)
+![image](https://github.com/user-attachments/assets/f0dbefe9-0306-4889-8d13-fa703a18b7d8)
+![image](https://github.com/user-attachments/assets/d26d50ec-dc1a-4565-a17f-865da651134e)
+![image](https://github.com/user-attachments/assets/c0905dba-60ca-4a37-852c-140fe5a464cc)
+
 
 ### 🔧 Installation
 
